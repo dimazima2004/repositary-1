@@ -1,0 +1,84 @@
+import pandas as pd
+import numpy as np
+
+df=pd.read_csv('MarvelComicCaracters.csv', sep=';')
+hf=pd.read_csv('MarvelComicCaracters.csv', sep=';')
+# hf=hf.dropna()
+# df=df.dropna()
+# print(df['eye'].value_counts())
+# print(
+#     df[df['sex']=='Мужской персонаж']['hair'].value_counts().index[0],
+#     df[df['sex']=='Женский персонаж']['hair'].value_counts().index[0]
+# )
+# print(df[df['align']=='Злой персонаж']['appearances'].median())
+# ------------------------------------------------------------------------------
+# sr=df['appearances'].mean()
+# raz=(df['appearances'] - sr)
+# raz2=raz**2
+# disp=raz2.sum()/len(raz)
+# print(round(disp))
+# ------------------------------------------------------------------------------
+# print(df['eye'].agg(lambda x: x.value_counts().index[0]))
+# print(hf['eye'].iloc()[501:].agg(lambda x: x.value_counts().index[0]))
+# ------------------------------------------------------------------------------
+# moda=df['hair'].mode()[0]
+# df_10=df[df['hair'] == moda]['appearances']
+# std_me=np.sqrt(((df_10-df_10.mean())**2).sum()/len(df_10))
+# print(round(std_me))
+# print(df_10.std(ddof=0))
+# print(df[df['hair'] == df['hair'].mode()[0]]['appearances'].std(ddof = 0))
+# print(hf['appearances'].var(ddof = 0))
+#  2 zadanie
+# ------------------------------------------------------------------------------
+df=df[df['appearances'].isna()==False]
+df=df[df['align'] == 'Злой персонаж']
+# iq3_angry=np.percentile(df[df['align']=='Злой персонаж']['appearances'], 75)
+# iq1_angry=np.percentile(df[df['align']=='Злой персонаж']['appearances'], 25)
+# raz_angry = iq3_angry - iq1_angry
+# iq3_kind=np.percentile(df[df['align']=='Добрый персонаж']['appearances'], 75)
+# iq1_kind=np.percentile(df[df['align']=='Добрый персонаж']['appearances'], 25)
+# raz_kind = iq3_kind - iq1_kind
+# print(raz_angry > raz_kind)
+# ------------------------------------------------------------------------------
+a = np.percentile(df['appearances'], 75)
+b = np.percentile(df['appearances'], 25)
+razmax = a - b
+# # print(df[df['appearances'] < b - 1.5 * razmax]['align'].value_counts())
+# print(df[df['appearances'] > a + 1.5 * razmax]['align'].value_counts())
+# print(((df['appearances'] > a + 1.5 * razmax).sum())+((df['appearances'] < b - 1.5 * razmax).sum()))
+# ------------------------------------------------------------------------------
+# df['app_log'] = np.log(df['appearances'])
+# # df[df['app_log'].isna() == False]
+# sr = df['app_log'].mean()
+# otk1 = sr + 3*(df['app_log'].std(ddof=0))
+# otk2 = sr - 3*(df['app_log'].std(ddof=0))
+# print(((df['app_log'] > otk1).sum()) + ((df['app_log'] < otk2).sum()))
+# ------------------------------------------------------------------------------
+# sr = df['appearances'].mean()
+# otkl1 = sr + 3*(df['appearances'].std(ddof=0))
+# otkl2 = sr - 3*(df['appearances'].std(ddof=0))
+# print(((df['appearances'] > otkl1).sum()) + ((df['appearances'] < otkl2).sum()))
+# ------------------------------------------------------------------------------
+# df=df[df['sex'] == 'Женский персонаж']
+# df=df[df['appearances'].isna() == False]
+# sr = df['appearances'].mean()
+# otkl1 = sr + 3*(df['appearances'].std(ddof=0))
+# otkl2 = sr - 3*(df['appearances'].std(ddof=0))
+# print(((df['appearances'] > otkl1).sum()) + ((df['appearances'] < otkl2).sum()))
+# ------------------------------------------------------------------------------
+df_1=df[df['appearances'] < (a + 1.5 * razmax)]
+df_1=df_1[df_1['appearances'] > (b - 1.5 * razmax)]
+
+# sr = hf['appearances'].mean()
+# otkl1 = sr + 3*(hf['appearances'].std(ddof=0))
+# otkl2 = sr - 3*(hf['appearances'].std(ddof=0))
+# hf_1=hf[hf['appearances'] < otkl1]
+# hf_1=hf_1[hf_1['appearances'] > otkl2]
+# print(df_1['appearances'].mean(),
+#       hf_1['appearances'].mean())
+# ------------------------------------------------------------------------------
+# print(df['appearances'].median())
+# print(df_1['appearances'].median())
+
+file=pd.read_pickle('BikesDataImputed.pkl')
+file.to_excel('table.xlsx', index=False)
