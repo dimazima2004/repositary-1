@@ -1,0 +1,115 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import datetime as dt
+import scipy.stats as st
+import statsmodels.api as sm
+
+df = pd.read_excel('CandyData.xlsx')
+
+# def new_column(row):
+#     if row['Vote1'] == 0 and row['Vote2'] == 0 and row['Vote3'] == 0:
+#         return 0
+#     elif row['Vote1'] == 1 and row['Vote2'] == 1 and row['Vote3'] == 1:
+#         return 1
+#     else:
+#         return 2
+# df['new_category'] = df.apply(new_column, axis=1)
+# df['Date'] = pd.to_datetime(df['Date'])
+# hf = df[df['Date'].dt.year == 2016]
+# a = hf.groupby(df['Date'].dt.month)['Title'].count()
+
+# df['Season'] = df['Date'].dt.month.map(
+#     lambda month: (
+#         'Winter' if month in [12, 1, 2] else
+#         'Spring' if month in [3, 4, 5] else
+#         'Summer' if month in [6, 7, 8] else
+#         'Autumn'
+#     ))
+
+# a = pd.DataFrame(df['Judge1'].value_counts())
+# b = pd.DataFrame(df['Judge2'].value_counts())
+# c = pd.DataFrame(df['Judge3'].value_counts())
+
+# g = pd.concat([a,b,c])
+# result = g.groupby(g.index)['count'].sum().reset_index()
+# result = result.sort_values('count', ascending=False).head(10)
+# print(result)
+
+# print(a, b, c)
+# a = df.groupby('Season')['Title'].count()
+
+# hf = df[(df['Judge1'] == 'Lucero') | (df['Judge2'] == 'Lucero') | (df['Judge3'] == 'Lucero')]
+# a = hf.groupby(hf["Date"].dt.year)['Title'].count()
+
+# fig, ax = pl.subplots(figsize = (20, 8))
+# ax.set_xticks(a.index)
+# ax.plot(a.index, a)
+# pl.show()
+# ------------------------------------------------------------------------------------------------------ 2nd part of visualization
+# new = df[df['urbanindex'].apply(lambda x: isinstance(x, str))]
+# new['normind'] = pd.to_numeric(new['urbanindex'])
+# a = new[new['state'] == 'Oklahoma']['normind']
+# plt.figure()
+# plt.hist(a)
+# plt.show()
+
+# corr = new[['population', 'adj_radiuspop_5', 'normind']].corr()
+# plt.figure()
+# sns.heatmap(corr, annot=True)
+# plt.show()
+
+# new_1 = new[new['state'].isin(['Kansas', 'Kentucky'])]
+# sns.boxplot(x='state', y='normind', data=new_1)
+# plt.show()
+
+# states = new['state'].unique()
+# corr_state = {}
+# for state in states:
+#     a = abs((new[new['state'] == state]['population'].corr(new[new['state'] == state]['adj_radiuspop_5'])))
+#     corr_state[a] = state
+# print(max(corr_state), corr_state[max(corr_state)])
+# --------------------------------------------------------------------------------------------------------------
+# a = df.groupby('gender')['fan'].value_counts().unstack()
+# print(sp.stats.chi2_contingency(a, correction = False))
+# --------------------------------------------------------------------------------------- параметрический критерий t
+# a1 = df[df['state'] == 'Wyoming']['log_pop']
+# a2 = df[df['state'] == 'South Dakota']['log_pop']
+# n1 = a1.count()
+# n2 = a2.count()
+# var1 = (((a1 - a1.mean())**2).sum())/n1
+# var2 = (((a2 - a2.mean())**2).sum())/n2
+# chisl = (var1/n1 + var2/n2)**2
+# znam = ((1/(n1-1))*((var1/n1)**2))+((1/(n2-1))*((var2/n2)**2)) 
+# print(chisl/znam)
+# print(np.sqrt(var1), np.sqrt(var2))
+# print(np.sqrt((var1/n1)+(var2/n2)))
+# print((a1.mean()-a2.mean())/(np.sqrt((var1/n1)+(var2/n2))))
+# print(st.ttest_ind(a1, a2, equal_var=False))
+# x = np.sqrt((var1/n1)+(var2/n2))
+# y = a1.mean() - a2.mean()
+# print(y - 2.59*x)
+# -------------------------------------------------------------------------------------------------- регрессия
+# x = np.array([3, 2, 98, 34, 11, 2, 3])
+# y = np.array([2, 1, 0, 3, 7, 2, 15])
+# res = (st.linregress(x, y))
+# y1 = x*res[0] + res[1]
+# absol = (abs(y-y1)).sum()
+# mse = ((y-y1)**2).sum()
+# print(absol/7, (mse)/7)
+
+# print(df[['sugarpercent', 'pricepercent', 'winpercent']].corr())
+# x = sm.add_constant(df[['sugarpercent', 'pricepercent']])
+# print(x)
+# y = df['winpercent']
+# model = sm.OLS(y, x)
+# print(model.fit().summary())
+
+df['winpercent_0'] = df['winpercent'].apply(lambda x: 1 if x > 50 else 0)
+print(df)
+y = df['winpercent_0']
+x = sm.add_constant(df[['sugarpercent', 'pricepercent']] - df[['sugarpercent', 'pricepercent']].mean())
+logit = sm.Logit(y, x)
+res = logit.fit()
+print(res.summary())
