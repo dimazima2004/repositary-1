@@ -1,0 +1,33 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+df = pd.read_excel("table.xlsx")
+
+df = df.rename(columns={"TNI a\n(Per cent)": "TNI"})
+
+print(df)
+
+mean_tni_by_country = df.groupby("Home economy")["TNI"].mean()
+
+df["Home economy (средний TNI)"] = df["Home economy"].apply(
+    lambda country: f"{country} ({mean_tni_by_country[country]:.1f})"
+)
+
+plt.figure(figsize=(12, 8))
+plt.title("Transnational Corporations - 2023")
+
+sns.stripplot(data=df, x="Home economy (средний TNI)", y="TNI", color='purple')
+plt.axhline(df['TNI'].mean(), color='gray', linestyle='--')
+plt.text(-0.5, df['TNI'].mean() + 1, f"Mean = {df['TNI'].mean():.1f}", color='black')
+
+plt.xlabel("")
+plt.ylabel("Transnationality Index (TNI)")
+plt.xticks(rotation=45, ha="right")
+
+plt.tight_layout()
+plt.show()
+
+#визуализация чего-то ==============================================================
+
+
