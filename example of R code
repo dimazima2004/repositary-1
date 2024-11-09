@@ -1,0 +1,185 @@
+df <- avitospb
+str(df)
+df$Type <- ifelse(df$Type == "студия", 1, 0)
+doc <- read_docx()
+summary_results <- summary(df)
+summary_results
+install.packages("officer")
+library(officer)
+install.packages('flextable')
+library(flextable)
+summary_df <- as.data.frame(summary_results)
+summary_table <- flextable::qflextable(summary_df)
+doc <- body_add_flextable(doc, value = summary_table)
+print(doc, target = "summary_results_2.docx")
+
+
+
+boxplot(df$Nfloor, col = 'lightblue', main = 'Nfloor')
+boxplot(df$Square, col = 'lightblue', main = 'Square')
+boxplot(df$Floors, col = 'lightblue', main = 'Floors')
+boxplot(df$Price, col = 'lightblue', main = 'Price')
+boxplot(df$Metro, col = 'lightblue', main = 'Metro')
+
+df<- avitospb_1 #без выбросов с сортировкой из Excel
+
+
+df_sub <- head(df, 5)
+ft <- flextable(df_sub)
+doc <- body_add_flextable(doc, value = ft)
+print(doc, target = "data.docx")
+
+df <- df[,-c(which(names(df) == "Neib"))]
+
+install.packages("corrplot")
+install.packages('ggcorrplot')
+library(ggcorrplot)
+library(corrplot)
+cor_matrix <- cor(df)
+cor_matrix <- round(cor_matrix, 3)
+
+install.packages('GGally')
+library(GGally)
+ggpairs(df)
+
+spirman <- cor(df$Type, df$Rooms, method = "spearman")
+spirman
+
+library(flextable)
+ft <- flextable(cor_matrix)
+doc <- body_add_flextable(doc, value = ft)
+print(doc, target = "corr.docx")
+
+library(ggplot2)
+library(lattice)
+histogram(df$Square,
+          col = 'lightblue',
+          xlab = 'Значение',
+          ylab = 'Частота',
+          main = 'Распределение Square',
+          breaks = 6)
+
+histogram(df$Nfloor,
+          col = 'lightblue',
+          xlab = 'Значение',
+          ylab = 'Частота',
+          main = 'Распределение Nfloor',
+          breaks =7)
+
+histogram(df$Floors,
+          col = 'lightblue',
+          xlab = 'Значение',
+          ylab = 'Частота',
+          main = 'Распределение Floors',
+          breaks = 8)
+
+a = sum(df$Type)
+b = 96 - a
+pot <- c(a, b)
+got <- c('Студия', 'Квартира')
+barplot(pot,
+        col = 'lightblue',
+        xlab = 'Значение',
+        ylab = 'Частота',
+        main = 'Распределение Type',
+        breaks = 25,
+        names.arg = got)
+histogram(df$Price,
+          col = 'lightblue',
+          xlab = 'Значение',
+          ylab = 'Частота',
+          main = 'Распределение Price',
+          breaks = 7)
+
+histogram(df$Metro,
+          col = 'lightblue',
+          xlab = 'Значение',
+          ylab = 'Частота',
+          main = 'Распределение Metro',
+          breaks = 5)
+table_rooms <- data.frame("rooms" = c('1 room', '2 rooms', '3 rooms'), "amount" = c(61,27, 8))
+ggplot(table_rooms, aes(x="", y = amount, fill=rooms)) +
+  geom_bar(stat="identity", width = 1) +
+  coord_polar("y", start=0)
+#-------------------------------------
+model <- lm(df$Price ~ df$Rooms + df$Type + df$Square + df$Nfloor + df$Floors + df$Metro)
+summary(model)
+a <- confint(model, level=0.95)
+summary_dv <- data.frame(a)
+summary_dv$names <- c('(Intercept)','Rooms', 'Type', 'Square', 'Nfloor', 'Floors', 'Metro')
+summary_table_dv <- flextable::qflextable(summary_dv)
+doc <- body_add_flextable(doc, value = summary_table_dv)
+print(doc, target = "summary_dv_1.docx")
+install.packages('stargazer')
+library(stargazer)
+stargazer(model, type = "html", out = "regression_model_1.doc")
+
+install.packages("Metrics")
+library(Metrics)
+predicted_1 <- predict(model, newdata = df)
+actual_1 <- df$Price
+mae_1 <- mae(actual_1, predicted_1)
+mse_1 <- mse(actual_1, predicted_1)
+mae_1
+mse_1
+rmse_1 <- sqrt(mse_1)
+rmse_1
+
+df$ln_price <- log(df$Price)
+model_2 <- lm(df$ln_price ~ df$Rooms + df$Square +df$Type + df$Nfloor + df$Floors + df$Metro)
+summary(model_2)
+c <- confint(model_2, level=0.95)
+summary_dv <- data.frame(c)
+summary_dv$names <- c('(Intercept)','Rooms', 'Type', 'Square', 'Nfloor', 'Floors', 'Metro')
+summary_table_dv <- flextable::qflextable(summary_dv)
+doc <- body_add_flextable(doc, value = summary_table_dv)
+print(doc, target = "summary_dv_2.docx")
+stargazer(model_2, type = "html", out = "regression_model_2.doc")
+predicted_2 <- predict(model_2, newdata = df)
+actual_2 <- df$ln_price
+mae_2 <- mae(actual_2, predicted_2)
+mse_2 <- mse(actual_2, predicted_2)
+mae_2
+mse_2
+rmse_2 <- sqrt(mse_2)
+rmse_2
+
+model_3 <- lm(df$Price ~ df$Rooms + df$Type + df$Square + df$Floors + df$Metro)
+summary(model_3)
+b <- confint(model_3, level=0.95)
+summary_dv <- data.frame(b)
+summary_dv$names <- c('(Intercept)','Rooms', 'Type', 'Square', 'Floors', 'Metro')
+summary_table_dv <- flextable::qflextable(summary_dv)
+doc <- body_add_flextable(doc, value = summary_table_dv)
+print(doc, target = "summary_dv_3.docx")
+stargazer(model_3, type = "html", out = "regression_model_3.doc")
+
+predicted_3 <- predict(model_3, newdata = df)
+actual_3 <- df$Price
+mae_3 <- mae(actual_3, predicted_3)
+mse_3 <- mse(actual_3, predicted_3)
+mae_3
+mse_3
+rmse_3 <- sqrt(mse_3)
+rmse_3
+
+model_4 <- lm(df$ln_price ~ df$Rooms + df$Square +df$Type + df$Floors + df$Metro)
+summary(model_4)
+d <- confint(model_4, level=0.95)
+summary_dv <- data.frame(d)
+summary_dv$names <- c('(Intercept)','Rooms', 'Type', 'Square', 'Floors', 'Metro')
+summary_table_dv <- flextable::qflextable(summary_dv)
+doc <- body_add_flextable(doc, value = summary_table_dv)
+print(doc, target = "summary_dv_4.docx")
+d
+stargazer(model_4, type = "html", out = "regression_model_4.doc")
+predicted_4 <- predict(model_4, newdata = df)
+actual_4 <- df$ln_price
+mae_4 <- mae(actual_2, predicted_4)
+mse_4 <- mse(actual_4, predicted_4)
+mae_4
+mse_4
+rmse_4 <- sqrt(mse_4)
+rmse_4
+
+#работа по эконометрике
